@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Your Equipment - Nirman360</title>
+    <meta name="description" content="List your construction equipment and materials on Nirman360. Connect with contractors across Bangalore.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#1E40AF',
+                        accent: '#3B82F6',
+                        dark: '#1E3A8A',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #2563EB, #3B82F6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-primary {
+            background-color: #2563EB;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1E40AF;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid #2563EB;
+            color: #2563EB;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #2563EB;
+            color: white;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container-max {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .section-padding {
+            padding: 3rem 0;
+        }
+        
+        .backdrop-blur-custom {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header Navigation -->
+    <header class="fixed top-0 w-full z-50 bg-white shadow-lg backdrop-blur-custom">
+        <nav class="container-max section-padding">
+            <div class="flex justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <img src="logo.jpeg" alt="Nirman360 Logo" class="w-10 h-10 object-contain rounded-lg">
+                    <span class="text-xl font-bold text-gray-800">Nirman360</span>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-700 hover:text-primary transition-colors">Home</a>
+                    <a href="#service-areas" class="text-gray-700 hover:text-primary transition-colors">Service Areas</a>
+                    <a href="#features" class="text-gray-700 hover:text-primary transition-colors">Features</a>
+                    <a href="#how-it-works" class="text-gray-700 hover:text-primary transition-colors">How It Works</a>
+                    <a href="index.html" class="btn-primary">Back to Home</a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden text-gray-700" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-gray-200">
+                <div class="flex flex-col space-y-4 mt-4">
+                    <a href="index.html" class="text-gray-700 hover:text-primary transition-colors">Home</a>
+                    <a href="#service-areas" class="text-gray-700 hover:text-primary transition-colors">Service Areas</a>
+                    <a href="#features" class="text-gray-700 hover:text-primary transition-colors">Features</a>
+                    <a href="#how-it-works" class="text-gray-700 hover:text-primary transition-colors">How It Works</a>
+                    <a href="index.html" class="btn-primary w-full">Back to Home</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white pt-20">
+        <div class="container-max section-padding">
+            <div class="max-w-4xl mx-auto text-center">
+                <!-- Badge -->
+                <div class="inline-flex items-center bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 animate-slide-up">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    List Your Equipment & Materials
+                </div>
+                
+                <!-- Main Headline -->
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
+                    Start Earning with
+                    <span class="gradient-text"> Your Equipment</span>
+                </h1>
+                
+                <!-- Subtext -->
+                <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    Join 100+ equipment owners and material suppliers earning ₹45K-90K monthly across Bangalore.
+                </p>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto mb-12">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">₹45K-90K</div>
+                        <div class="text-sm text-gray-600">Monthly per JCB</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">85%</div>
+                        <div class="text-sm text-gray-600">Utilization Rate</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">24 hrs</div>
+                        <div class="text-sm text-gray-600">Payment Time</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">0%</div>
+                        <div class="text-sm text-gray-600">Listing Fees</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Provider Type Selection -->
+    <section class="py-20 bg-white">
+        <div class="container-max section-padding">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                    What Would You Like to List?
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Choose your provider type to get started with the right listing form.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Equipment Provider Card -->
+                <div class="card group cursor-pointer" onclick="showEquipmentForm()">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-all duration-300">
+                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Equipment Provider</h3>
+                        <p class="text-gray-600 mb-6">
+                            List construction equipment like JCBs, cranes, loaders, trucks, and more.
+                        </p>
+                        <div class="space-y-2 text-left">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                JCBs, Excavators, Cranes
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Loaders, Trucks, Tippers
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Generators, Mixers, Compactors
+                            </div>
+                        </div>
+                        <button class="btn-primary w-full mt-6">
+                            List Equipment →
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Material Seller Card -->
+                <div class="card group cursor-pointer" onclick="showMaterialForm()">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-all duration-300">
+                            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Material Seller</h3>
+                        <p class="text-gray-600 mb-6">
+                            Supply construction materials like cement, sand, steel, bricks, and more.
+                        </p>
+                        <div class="space-y-2 text-left">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Cement, Sand, Aggregates
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Steel, TMT Bars, Wires
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                Bricks, Blocks, Tiles
+                            </div>
+                        </div>
+                        <button class="btn-secondary w-full mt-6 border-green-600 text-green-600 hover:bg-green-600 hover:text-white">
+                            List Materials →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Equipment Listing Form (Hidden by default) -->
+    <section id="equipmentForm" class="py-20 bg-gray-50 hidden">
+        <div class="container-max section-padding">
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                        List Your Equipment
+                    </h2>
+                    <p class="text-xl text-gray-600">
+                        Provide details about your construction equipment to connect with contractors.
+                    </p>
+                </div>
+                
+                <form class="space-y-6" onsubmit="submitEquipmentForm(event)">
+                    <!-- Basic Information -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Basic Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Your Name *</label>
+                                <input type="text" class="form-input" required placeholder="John Doe">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                                <input type="tel" class="form-input" required placeholder="+91 98765 43210">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <input type="email" class="form-input" placeholder="john@example.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                                <input type="text" class="form-input" placeholder="ABC Construction Equipment">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Equipment Details -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Equipment Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Equipment Type *</label>
+                                <select class="form-select" required>
+                                    <option value="">Select Equipment Type</option>
+                                    <option value="jcb">JCB/Excavator</option>
+                                    <option value="crane">Crane</option>
+                                    <option value="loader">Loader</option>
+                                    <option value="truck">Truck/Tipper</option>
+                                    <option value="mixer">Concrete Mixer</option>
+                                    <option value="generator">Generator</option>
+                                    <option value="compactor">Compactor</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Brand/Model *</label>
+                                <input type="text" class="form-input" required placeholder="JCB 3DX, Tata Hitachi, etc.">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Year of Manufacture</label>
+                                <input type="number" class="form-input" placeholder="2020" min="1990" max="2024">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Working Condition</label>
+                                <select class="form-select">
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Equipment Description</label>
+                            <textarea class="form-textarea" placeholder="Describe your equipment, specifications, special features, etc."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Pricing & Availability -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Pricing & Availability</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Hourly Rate (₹) *</label>
+                                <input type="number" class="form-input" required placeholder="500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Daily Rate (₹) *</label>
+                                <input type="number" class="form-input" required placeholder="3000">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Rate (₹)</label>
+                                <input type="number" class="form-input" placeholder="45000">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
+                            <select class="form-select">
+                                <option value="available">Available Now</option>
+                                <option value="busy">Currently Busy</option>
+                                <option value="maintenance">Under Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Service Location</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Service Area *</label>
+                                <select class="form-select" required>
+                                    <option value="">Select Service Area</option>
+                                    <option value="whitefield">Whitefield</option>
+                                    <option value="sarjapur">Sarjapur Road</option>
+                                    <option value="electronic">Electronic City</option>
+                                    <option value="hebbal">Hebbal</option>
+                                    <option value="devanahalli">Devanahalli</option>
+                                    <option value="hsr">HSR Layout</option>
+                                    <option value="other">Other Area</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Complete Address</label>
+                                <input type="text" class="form-input" placeholder="123, Main Road, Bangalore">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn-primary text-lg px-8 py-4">
+                            Submit Equipment Listing
+                        </button>
+                        <p class="text-sm text-gray-500 mt-4">
+                            By submitting, you agree to our terms and conditions. We'll contact you within 24 hours.
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Material Listing Form (Hidden by default) -->
+    <section id="materialForm" class="py-20 bg-gray-50 hidden">
+        <div class="container-max section-padding">
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                        List Your Materials
+                    </h2>
+                    <p class="text-xl text-gray-600">
+                        Provide details about your construction materials to connect with contractors.
+                    </p>
+                </div>
+                
+                <form class="space-y-6" onsubmit="submitMaterialForm(event)">
+                    <!-- Basic Information -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Basic Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Your Name *</label>
+                                <input type="text" class="form-input" required placeholder="John Doe">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                                <input type="tel" class="form-input" required placeholder="+91 98765 43210">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <input type="email" class="form-input" placeholder="john@example.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                                <input type="text" class="form-input" placeholder="ABC Building Materials">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Material Details -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Material Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Material Type *</label>
+                                <select class="form-select" required>
+                                    <option value="">Select Material Type</option>
+                                    <option value="cement">Cement</option>
+                                    <option value="sand">Sand</option>
+                                    <option value="steel">Steel/TMT Bars</option>
+                                    <option value="bricks">Bricks/Blocks</option>
+                                    <option value="aggregates">Aggregates</option>
+                                    <option value="tiles">Tiles</option>
+                                    <option value="paint">Paint</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Brand/Grade *</label>
+                                <input type="text" class="form-input" required placeholder="ACC Cement 53 Grade, TATA TMT, etc.">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Available Quantity *</label>
+                                <input type="text" class="form-input" required placeholder="500 bags, 10 tons, etc.">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price (₹) *</label>
+                                <input type="number" class="form-input" required placeholder="350 per bag, 50000 per ton">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Material Description</label>
+                            <textarea class="form-textarea" placeholder="Describe your material quality, specifications, source, etc."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Service Location</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Service Area *</label>
+                                <select class="form-select" required>
+                                    <option value="">Select Service Area</option>
+                                    <option value="whitefield">Whitefield</option>
+                                    <option value="sarjapur">Sarjapur Road</option>
+                                    <option value="electronic">Electronic City</option>
+                                    <option value="hebbal">Hebbal</option>
+                                    <option value="devanahalli">Devanahalli</option>
+                                    <option value="hsr">HSR Layout</option>
+                                    <option value="other">Other Area</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Complete Address</label>
+                                <input type="text" class="form-input" placeholder="123, Main Road, Bangalore">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Delivery Options -->
+                    <div class="card">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Delivery Options</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="delivery" class="mr-3">
+                                <label for="delivery" class="text-gray-700">Delivery Available</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="pickup" class="mr-3">
+                                <label for="pickup" class="text-gray-700">Pickup Available</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Delivery Charges (if applicable)</label>
+                                <input type="text" class="form-input" placeholder="500 per trip, free within 10km, etc.">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn-primary text-lg px-8 py-4">
+                            Submit Material Listing
+                        </button>
+                        <p class="text-sm text-gray-500 mt-4">
+                            By submitting, you agree to our terms and conditions. We'll contact you within 24 hours.
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Message (Hidden by default) -->
+    <section id="successMessage" class="py-20 bg-green-50 hidden">
+        <div class="container-max section-padding">
+            <div class="max-w-2xl mx-auto text-center">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">
+                    Thank You for Your Submission!
+                </h2>
+                <p class="text-xl text-gray-600 mb-8">
+                    We've received your listing information. Our team will contact you within 24 hours to verify details and activate your listing.
+                </p>
+                <div class="space-y-4">
+                    <div class="bg-white rounded-lg p-6 text-left">
+                        <h3 class="font-semibold text-gray-800 mb-2">What happens next?</h3>
+                        <ul class="space-y-2 text-gray-600">
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Our team will review your submission within 24 hours
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                We'll call you to verify details and discuss pricing
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Your listing will go live on Nirman360 platform
+                            </li>
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Start receiving booking requests from contractors
+                            </li>
+                        </ul>
+                    </div>
+                    <button onclick="window.location.href='index.html'" class="btn-primary">
+                        Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript -->
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        function showEquipmentForm() {
+            document.getElementById('equipmentForm').classList.remove('hidden');
+            document.getElementById('materialForm').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+            
+            // Scroll to form
+            document.getElementById('equipmentForm').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        function showMaterialForm() {
+            document.getElementById('materialForm').classList.remove('hidden');
+            document.getElementById('equipmentForm').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+            
+            // Scroll to form
+            document.getElementById('materialForm').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        function submitEquipmentForm(event) {
+            event.preventDefault();
+            
+            // Collect form data
+            const formData = {
+                provider_name: document.querySelector('input[placeholder="John Doe"]').value,
+                phone: document.querySelector('input[placeholder="+91 98765 43210"]').value,
+                email: document.querySelector('input[placeholder="john@example.com"]').value,
+                company_name: document.querySelector('input[placeholder="ABC Construction Equipment"]').value,
+                equipment_type: document.querySelector('select[required] option:checked').value,
+                brand_model: document.querySelector('input[placeholder="JCB 3DX, Tata Hitachi, etc."]').value,
+                year_of_manufacture: document.querySelector('input[placeholder="2020"]').value,
+                working_condition: document.querySelector('select').value,
+                description: document.querySelector('textarea[placeholder*="equipment"]').value,
+                hourly_rate: document.querySelector('input[placeholder="500"]').value,
+                daily_rate: document.querySelector('input[placeholder="3000"]').value,
+                monthly_rate: document.querySelector('input[placeholder="45000"]').value,
+                availability_status: document.querySelector('select:last-of-type').value,
+                service_area: document.querySelector('select[required]:last-of-type option:checked').value,
+                address: document.querySelector('input[placeholder*="Main Road"]').value
+            };
+            
+            // Send data to backend
+            fetch('http://localhost:3000/api/equipment/list', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // Show success message
+                document.getElementById('equipmentForm').classList.add('hidden');
+                document.getElementById('materialForm').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
+                
+                // Scroll to success message
+                document.getElementById('successMessage').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Error submitting form. Please try again.');
+            });
+        }
+        
+        function submitMaterialForm(event) {
+            event.preventDefault();
+            
+            // Collect form data
+            const formData = {
+                seller_name: document.querySelector('#materialForm input[placeholder="John Doe"]').value,
+                phone: document.querySelector('#materialForm input[placeholder="+91 98765 43210"]').value,
+                email: document.querySelector('#materialForm input[placeholder="john@example.com"]').value,
+                company_name: document.querySelector('#materialForm input[placeholder="ABC Building Materials"]').value,
+                material_type: document.querySelector('#materialForm select[required] option:checked').value,
+                brand_grade: document.querySelector('#materialForm input[placeholder="ACC Cement 53 Grade, TATA TMT, etc."]').value,
+                available_quantity: document.querySelector('#materialForm input[placeholder="500 bags, 10 tons, etc."]').value,
+                unit_price: document.querySelector('#materialForm input[placeholder="350 per bag, 50000 per ton"]').value,
+                description: document.querySelector('#materialForm textarea[placeholder*="material"]').value,
+                service_area: document.querySelector('#materialForm select[required]:last-of-type option:checked').value,
+                address: document.querySelector('#materialForm input[placeholder*="Main Road"]').value,
+                delivery_available: document.getElementById('delivery').checked,
+                pickup_available: document.getElementById('pickup').checked,
+                delivery_charges: document.querySelector('#materialForm input[placeholder*="delivery"]').value
+            };
+            
+            // Send data to backend
+            fetch('http://localhost:3000/api/materials/list', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // Show success message
+                document.getElementById('equipmentForm').classList.add('hidden');
+                document.getElementById('materialForm').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
+                
+                // Scroll to success message
+                document.getElementById('successMessage').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Error submitting form. Please try again.');
+            });
+        }
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
