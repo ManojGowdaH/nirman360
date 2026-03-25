@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nirman360 - Backend Debug</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .success {
+            color: #22c55e;
+            background: #f0fdf4;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #86efac;
+            margin: 10px 0;
+        }
+        .error {
+            color: #ef4444;
+            background: #fef2f2;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #fca5a5;
+            margin: 10px 0;
+        }
+        .warning {
+            color: #f59e0b;
+            background: #fffbeb;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #fcd34d;
+            margin: 10px 0;
+        }
+        .info {
+            color: #3b82f6;
+            background: #eff6ff;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #93c5fd;
+            margin: 10px 0;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        pre {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ok { background: #22c55e; }
+        .status-error { background: #ef4444; }
+        .status-warning { background: #f59e0b; }
+        .status-unknown { background: #9ca3af; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Nirman360 Backend Debug Dashboard</h1>
+        
+        <div class="info">
+            <strong>📋 Debugging Checklist:</strong><br>
+            1. Supabase Connection<br>
+            2. Database Tables<br>
+            3. API Endpoints<br>
+            4. Form Submissions<br>
+            5. Environment Variables
+        </div>
+
+        <h2>🔗 Supabase Connection Status</h2>
+        <button onclick="testSupabaseConnection()">Test Supabase Connection</button>
+        <button onclick="testServiceAreas()">Test Service Areas</button>
+        <button onclick="testDatabaseStructure()">Test Database Structure</button>
+        <div id="supabase-results"></div>
+
+        <h2>📊 Database Tables Status</h2>
+        <button onclick="checkAllTables()">Check All Tables</button>
+        <button onclick="checkTableData()">Check Table Data</button>
+        <div id="database-results"></div>
+
+        <h2>🔌 API Endpoints Test</h2>
+        <button onclick="testEquipmentAPI()">Test Equipment API</button>
+        <button onclick="testMaterialsAPI()">Test Materials API</button>
+        <button onclick="testStatsAPI()">Test Stats API</button>
+        <div id="api-results"></div>
+
+        <h2>📝 Form Submission Test</h2>
+        <button onclick="testEquipmentForm()">Test Equipment Form</button>
+        <button onclick="testMaterialForm()">Test Material Form</button>
+        <div id="form-results"></div>
+
+        <h2>⚙️ Environment Variables Check</h2>
+        <button onclick="checkEnvironment()">Check Environment</button>
+        <div id="env-results"></div>
+    </div>
+
+    <div class="grid">
+        <div class="container">
+            <h2>🛠️ Quick Fixes</h2>
+            <div class="warning">
+                <strong>Common Issues & Solutions:</strong><br><br>
+                <strong>1. Database Tables Missing:</strong><br>
+                → Run SQL in Supabase dashboard<br><br>
+                <strong>2. Connection Failed:</strong><br>
+                → Check Supabase URL and keys<br><br>
+                <strong>3. CORS Errors:</strong><br>
+                → Add Vercel domain to Supabase CORS<br><br>
+                <strong>4. Form Not Submitting:</strong><br>
+                → Check JavaScript errors in browser console
+            </div>
+            
+            <h3>🔧 Manual SQL Setup</h3>
+            <button onclick="copySQLToClipboard()">Copy SQL to Clipboard</button>
+            <div id="sql-status"></div>
+        </div>
+
+        <div class="container">
+            <h2>📊 Live Status Monitor</h2>
+            <div id="status-monitor">
+                <div><span class="status-indicator status-unknown"></span>Supabase Connection: Unknown</div>
+                <div><span class="status-indicator status-unknown"></span>Database Tables: Unknown</div>
+                <div><span class="status-indicator status-unknown"></span>API Endpoints: Unknown</div>
+                <div><span class="status-indicator status-unknown"></span>Form Submissions: Unknown</div>
+                <div><span class="status-indicator status-unknown"></span>Environment Variables: Unknown</div>
+            </div>
+            <button onclick="runFullDiagnostics()">Run Full Diagnostics</button>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://vlfucggnbkizkxkvzfux.supabase.co';
+        const supabaseAnonKey = 'sb_publishable_3XK1mz1LLVc7016pPUpgmQ_uk7CXWSr';
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+        // Status tracking
+        let status = {
+            supabase: 'unknown',
+            database: 'unknown',
+            api: 'unknown',
+            forms: 'unknown',
+            environment: 'unknown'
+        };
+
+        // Test Supabase Connection
+        async function testSupabaseConnection() {
+            const resultsDiv = document.getElementById('supabase-results');
+            resultsDiv.innerHTML = '<div class="info">🔄 Testing Supabase connection...</div>';
+            
+            try {
+                // Test basic connection
+                const { data, error } = await supabase
+                    .from('service_areas')
+                    .select('count')
+                    .limit(1);
+
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        resultsDiv.innerHTML = '<div class="warning">⚠️ Connection successful but tables not found. Run SQL setup first.</div>';
+                        status.supabase = 'warning';
+                    } else {
+                        resultsDiv.innerHTML = '<div class="error">❌ Connection failed: ' + error.message + '</div>';
+                        status.supabase = 'error';
+                    }
+                } else {
+                    resultsDiv.innerHTML = '<div class="success">✅ Supabase connection successful!</div>';
+                    status.supabase = 'ok';
+                }
+                updateStatusMonitor();
+            } catch (err) {
+                resultsDiv.innerHTML = '<div class="error">❌ Error: ' + err.message + '</div>';
+                status.supabase = 'error';
+                updateStatusMonitor();
+            }
+        }
+
+        // Test Service Areas
+        async function testServiceAreas() {
+            const resultsDiv = document.getElementById('supabase-results');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('service_areas')
+                    .select('*')
+                    .limit(10);
+
+                if (error) {
+                    resultsDiv.innerHTML += '<div class="error">❌ Error fetching service areas: ' + error.message + '</div>';
+                } else {
+                    const html = `
+                        <div class="success">✅ Found ${data.length} service areas:</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    resultsDiv.innerHTML += html;
+                    status.supabase = 'ok';
+                }
+                updateStatusMonitor();
+            } catch (err) {
+                resultsDiv.innerHTML += '<div class="error">❌ Error: ' + err.message + '</div>';
+                status.supabase = 'error';
+                updateStatusMonitor();
+            }
+        }
+
+        // Test Database Structure
+        async function testDatabaseStructure() {
+            const resultsDiv = document.getElementById('supabase-results');
+            const tables = ['users', 'equipment', 'materials', 'service_areas', 'bookings', 'reviews'];
+            
+            resultsDiv.innerHTML += '<div class="info">🔄 Checking database structure...</div>';
+            
+            for (const table of tables) {
+                try {
+                    const { data, error } = await supabase
+                        .from(table)
+                        .select('count')
+                        .limit(1);
+
+                    const status = error ? '❌' : '✅';
+                    const message = error ? error.message : 'OK';
+                    resultsDiv.innerHTML += `<div class="${error ? 'error' : 'success'}">${status} ${table}: ${message}</div>`;
+                } catch (err) {
+                    resultsDiv.innerHTML += `<div class="error">❌ ${table}: ${err.message}</div>`;
+                }
+            }
+            updateStatusMonitor();
+        }
+
+        // Check All Tables
+        async function checkAllTables() {
+            const resultsDiv = document.getElementById('database-results');
+            const tables = ['users', 'equipment', 'materials', 'service_areas', 'bookings', 'reviews'];
+            
+            resultsDiv.innerHTML = '<div class="info">🔄 Checking all tables...</div>';
+            
+            for (const table of tables) {
+                try {
+                    const { data, error, count } = await supabase
+                        .from(table)
+                        .select('*', { count: 'exact', head: true });
+
+                    const status = error ? '❌' : '✅';
+                    const countText = error ? '0' : count;
+                    resultsDiv.innerHTML += `<div class="${error ? 'error' : 'success'}">${status} ${table}: ${countText} records</div>`;
+                } catch (err) {
+                    resultsDiv.innerHTML += `<div class="error">❌ ${table}: ${err.message}</div>`;
+                }
+            }
+            status.database = 'ok';
+            updateStatusMonitor();
+        }
+
+        // Check Table Data
+        async function checkTableData() {
+            const resultsDiv = document.getElementById('database-results');
+            
+            try {
+                const [users, equipment, materials, serviceAreas] = await Promise.all([
+                    supabase.from('users').select('*').limit(3),
+                    supabase.from('equipment').select('*').limit(3),
+                    supabase.from('materials').select('*').limit(3),
+                    supabase.from('service_areas').select('*').limit(6)
+                ]);
+
+                resultsDiv.innerHTML += '<div class="success">✅ Sample data:</div>';
+                resultsDiv.innerHTML += '<pre>' + JSON.stringify({
+                    users: users.data || [],
+                    equipment: equipment.data || [],
+                    materials: materials.data || [],
+                    service_areas: serviceAreas.data || []
+                }, null, 2) + '</pre>';
+            } catch (err) {
+                resultsDiv.innerHTML += '<div class="error">❌ Error fetching data: ' + err.message + '</div>';
+            }
+        }
+
+        // Test Equipment API
+        async function testEquipmentAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<div class="info">🔄 Testing equipment API...</div>';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('equipment')
+                    .select(`
+                        *,
+                        users!equipment_provider_id_fkey (
+                            name,
+                            phone,
+                            company_name
+                        )
+                    `)
+                    .limit(3);
+
+                if (error) {
+                    resultsDiv.innerHTML += '<div class="error">❌ Equipment API error: ' + error.message + '</div>';
+                    status.api = 'error';
+                } else {
+                    resultsDiv.innerHTML += '<div class="success">✅ Equipment API working! Found ' + data.length + ' items</div>';
+                    resultsDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    status.api = 'ok';
+                }
+            } catch (err) {
+                resultsDiv.innerHTML += '<div class="error">❌ Error: ' + err.message + '</div>';
+                status.api = 'error';
+            }
+            updateStatusMonitor();
+        }
+
+        // Test Materials API
+        async function testMaterialsAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('materials')
+                    .select(`
+                        *,
+                        users!material_seller_id_fkey (
+                            name,
+                            phone,
+                            company_name
+                        )
+                    `)
+                    .limit(3);
+
+                if (error) {
+                    resultsDiv.innerHTML += '<div class="error">❌ Materials API error: ' + error.message + '</div>';
+                } else {
+                    resultsDiv.innerHTML += '<div class="success">✅ Materials API working! Found ' + data.length + ' items</div>';
+                    resultsDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (err) {
+                resultsDiv.innerHTML += '<div class="error">❌ Error: ' + err.message + '</div>';
+            }
+        }
+
+        // Test Stats API
+        async function testStatsAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            
+            try {
+                const [equipmentResult, materialResult, providerResult, sellerResult] = await Promise.all([
+                    supabase.from('equipment').select('id', { count: 'exact', head: true }),
+                    supabase.from('materials').select('id', { count: 'exact', head: true }),
+                    supabase.from('users').select('id', { count: 'exact', head: true }).eq('user_type', 'equipment_provider'),
+                    supabase.from('users').select('id', { count: 'exact', head: true }).eq('user_type', 'material_seller')
+                ]);
+
+                const stats = {
+                    equipment_count: equipmentResult.count || 0,
+                    material_count: materialResult.count || 0,
+                    provider_count: providerResult.count || 0,
+                    seller_count: sellerResult.count || 0
+                };
+
+                resultsDiv.innerHTML += '<div class="success">✅ Stats API working!</div>';
+                resultsDiv.innerHTML += '<pre>' + JSON.stringify(stats, null, 2) + '</pre>';
+            } catch (err) {
+                resultsDiv.innerHTML += '<div class="error">❌ Error: ' + err.message + '</div>';
+            }
+        }
+
+        // Test Equipment Form
+        async function testEquipmentForm() {
+            const resultsDiv = document.getElementById('form-results');
+            resultsDiv.innerHTML = '<div class="info">🔄 Testing equipment form submission...</div>';
+            
+            const testData = {
+                provider_name: 'Test Provider',
+                phone: '+919876543210',
+                email: 'test@example.com',
+                company_name: 'Test Company',
+                equipment_type: 'jcb',
+                brand_model: 'Test JCB 3DX',
+                year_of_manufacture: 2020,
+                working_condition: 'excellent',
+                description: 'Test equipment description',
+                hourly_rate: 500,
+                daily_rate: 3000,
+                monthly_rate: 45000,
+                availability_status: 'available',
+                service_area: 'Whitefield',
+                address: 'Test Address, Whitefield'
+            };
+
+            try {
+                // Check if provider exists
+                const { data: existingProvider } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('phone', testData.phone)
+                    .single();
+
+                let providerId;
+                
+                if (existingProvider) {
+                    providerId = existingProvider.id;
+                } else {
+                    // Create new provider
+                    const { data: newProvider } = await supabase
+                        .from('users')
+                        .insert([{
+                            name: testData.provider_name,
+                            phone: testData.phone,
+                            email: testData.email,
+                            company_name: testData.company_name,
+                            user_type: 'equipment_provider',
+                            address: testData.address,
+                            service_area: testData.service_area
+                        }])
+                        .select()
+                        .single();
+
+                    providerId = newProvider.id;
+                }
+
+                // Create equipment listing
+                const { data, error } = await supabase
+                    .from('equipment')
+                    .insert([{
+                        provider_id: providerId,
+                        equipment_type: testData.equipment_type,
+                        brand_model: testData.brand_model,
+                        year_of_manufacture: testData.year_of_manufacture,
+                        working_condition: testData.working_condition,
+                        description: testData.description,
+                        hourly_rate: testData.hourly_rate,
+                        daily_rate: testData.daily_rate,
+                        monthly_rate: testData.monthly_rate,
+                        availability_status: testData.availability_status,
+                        service_area: testData.service_area,
+                        address: testData.address
+                    }])
+                    .select()
+                    .single();
+
+                if (error) {
+                    resultsDiv.innerHTML += '<div class="error">❌ Equipment form error: ' + error.message + '</div>';
+                    status.forms = 'error';
+                } else {
+                    resultsDiv.innerHTML += '<div class="success">✅ Equipment form submission successful!</div>';
+                    resultsDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    status.forms = 'ok';
+                }
+            } catch (err) {
+                resultsDiv.innerHTML += '<div class="error">❌ Error: ' + err.message + '</div>';
+                status.forms = 'error';
+            }
+            updateStatusMonitor();
+        }
+
+        // Test Material Form
+        async function testMaterialForm() {
+            const resultsDiv = document.getElementById('form-results');
+            
+            const testData = {
+                seller_name: 'Test Seller',
+                phone: '+919876543211',
+                email: 'seller@example.com',
+                company_name: 'Test Materials',
+                material_type: 'cement',
+                brand_grade: 'ACC Cement 53 Grade',
+                available_quantity: '100 bags',
+                unit_price: 350,
+                description: 'Test cement description',
+                service_area: 'Whitefield',
+                address: 'Test Address, Whitefield',
+                delivery_available: true,
+                pickup_available: true,
+                delivery_charges: '500 per trip'
+            };
+
+            try {
+                // Check if seller exists
+                const { data: existingSeller } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('phone', testData.phone)
+                    .single();
+
+                let sellerId;
+                
+                if (existingSeller) {
+                    sellerId = existingSeller.id;
+                } else {
+                    // Create new seller
+                    const { data: newSeller } = await supabase
+                        .from('users')
+                        .insert([{
+                            name: testData.seller_name,
+                            phone: testData.phone,
+                            email: testData.email,
+                            company_name: testData.company_name,
+                            user_type: 'material_seller',
+                            address: testData.address,
+                            service_area: testData.service_area
+                        }])
+                        .select()
+                        .single();
+
+                    sellerId = newSeller.id;
+                }
+
+                // Create material listing
+                const { data, error } = await supabase
+                    .from('materials')
+                    .insert([{
+                        seller_id: sellerId,
+                        material_type: testData.material_type,
+                        brand_grade: testData.brand_grade,
+                        available_quantity: testData.available_quantity,
+                        unit_price: testData.unit_price,
+                        description: testData.description,
+                        service_area: testData.service_area,
+                        address: testData.address,
+                        delivery_available: testData.delivery_available,
+                        pickup_available: testData.pickup_available,
+                        delivery_charges: testData.delivery_charges
+                    }])
+                    .select()
+                    .single();
+
+                if (error) {
+                    resultsDiv.innerHTML += '<div class="error">❌ Material form error: ' + error.message + '</div>';
+                } else {
+                    resultsDiv.innerHTML += '<div class="success">✅ Material form submission successful!</div>';
+                    resultsDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (err) {
+                resultsDiv.innerHTML += '<div class="error">❌ Error: ' + err.message + '</div>';
+            }
+        }
+
+        // Check Environment
+        function checkEnvironment() {
+            const resultsDiv = document.getElementById('env-results');
+            
+            const env = {
+                supabaseUrl: supabaseUrl,
+                supabaseKeyLength: supabaseAnonKey.length,
+                browser: navigator.userAgent,
+                location: window.location.href,
+                timestamp: new Date().toISOString()
+            };
+
+            resultsDiv.innerHTML = '<div class="info">📊 Environment Information:</div>';
+            resultsDiv.innerHTML += '<pre>' + JSON.stringify(env, null, 2) + '</pre>';
+            
+            // Check if we're on Vercel
+            if (window.location.hostname.includes('vercel.app')) {
+                resultsDiv.innerHTML += '<div class="success">✅ Running on Vercel</div>';
+                status.environment = 'ok';
+            } else {
+                resultsDiv.innerHTML += '<div class="warning">⚠️ Not running on Vercel (local development)</div>';
+                status.environment = 'warning';
+            }
+            updateStatusMonitor();
+        }
+
+        // Copy SQL to Clipboard
+        function copySQLToClipboard() {
+            const sql = `-- Users Table
+CREATE TABLE users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE,
+  company_name TEXT,
+  user_type TEXT NOT NULL CHECK (user_type IN ('equipment_provider', 'material_seller', 'contractor')),
+  address TEXT,
+  service_area TEXT,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'pending')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Equipment Table
+CREATE TABLE equipment (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  provider_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  equipment_type TEXT NOT NULL,
+  brand_model TEXT NOT NULL,
+  year_of_manufacture INTEGER,
+  working_condition TEXT CHECK (working_condition IN ('excellent', 'good', 'fair')),
+  description TEXT,
+  hourly_rate DECIMAL(10,2),
+  daily_rate DECIMAL(10,2),
+  monthly_rate DECIMAL(10,2),
+  availability_status TEXT DEFAULT 'available' CHECK (availability_status IN ('available', 'busy', 'maintenance')),
+  service_area TEXT NOT NULL,
+  address TEXT,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'pending')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Materials Table
+CREATE TABLE materials (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  seller_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  material_type TEXT NOT NULL,
+  brand_grade TEXT NOT NULL,
+  available_quantity TEXT NOT NULL,
+  unit_price DECIMAL(10,2) NOT NULL,
+  description TEXT,
+  service_area TEXT NOT NULL,
+  address TEXT,
+  delivery_available BOOLEAN DEFAULT FALSE,
+  pickup_available BOOLEAN DEFAULT FALSE,
+  delivery_charges TEXT,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'pending')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Service Areas Table
+CREATE TABLE service_areas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  description TEXT,
+  demand_level TEXT DEFAULT 'medium' CHECK (demand_level IN ('low', 'medium', 'high')),
+  equipment_count INTEGER DEFAULT 0,
+  active_projects INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'pending')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Insert Service Areas Data
+INSERT INTO service_areas (name, description, demand_level, equipment_count, active_projects) VALUES
+('Whitefield', 'IT corridor growth', 'high', 120, 45),
+('Sarjapur Road', 'Apartment boom', 'high', 95, 38),
+('Electronic City', 'Industrial + residential', 'medium', 85, 32),
+('Hebbal', 'Infrastructure projects', 'high', 75, 28),
+('Devanahalli', 'Airport expansion', 'medium', 60, 25),
+('HSR Layout', 'Commercial development', 'medium', 65, 22);`;
+
+            navigator.clipboard.writeText(sql).then(() => {
+                document.getElementById('sql-status').innerHTML = '<div class="success">✅ SQL copied to clipboard!</div>';
+            }).catch(() => {
+                document.getElementById('sql-status').innerHTML = '<div class="error">❌ Failed to copy to clipboard</div>';
+            });
+        }
+
+        // Update Status Monitor
+        function updateStatusMonitor() {
+            const monitor = document.getElementById('status-monitor');
+            const statusClass = {
+                'ok': 'status-ok',
+                'error': 'status-error',
+                'warning': 'status-warning',
+                'unknown': 'status-unknown'
+            };
+
+            monitor.innerHTML = `
+                <div><span class="status-indicator ${statusClass[status.supabase]}"></span>Supabase Connection: ${status.supabase}</div>
+                <div><span class="status-indicator ${statusClass[status.database]}"></span>Database Tables: ${status.database}</div>
+                <div><span class="status-indicator ${statusClass[status.api]}"></span>API Endpoints: ${status.api}</div>
+                <div><span class="status-indicator ${statusClass[status.forms]}"></span>Form Submissions: ${status.forms}</div>
+                <div><span class="status-indicator ${statusClass[status.environment]}"></span>Environment Variables: ${status.environment}</div>
+            `;
+        }
+
+        // Run Full Diagnostics
+        async function runFullDiagnostics() {
+            // Reset status
+            status = {
+                supabase: 'unknown',
+                database: 'unknown',
+                api: 'unknown',
+                forms: 'unknown',
+                environment: 'unknown'
+            };
+            
+            // Run all tests
+            await testSupabaseConnection();
+            await testServiceAreas();
+            await checkAllTables();
+            await testEquipmentAPI();
+            await testEquipmentForm();
+            checkEnvironment();
+            
+            // Final summary
+            const allOk = Object.values(status).every(s => s === 'ok');
+            const hasErrors = Object.values(status).some(s => s === 'error');
+            
+            if (allOk) {
+                alert('🎉 All systems operational! Your backend is working perfectly.');
+            } else if (hasErrors) {
+                alert('⚠️ Some issues detected. Check the detailed results above.');
+            } else {
+                alert('⚡ Some warnings detected. Backend should work but may need attention.');
+            }
+        }
+
+        // Auto-run connection test on load
+        window.addEventListener('load', () => {
+            setTimeout(testSupabaseConnection, 1000);
+        });
+    </script>
+</body>
+</html>
