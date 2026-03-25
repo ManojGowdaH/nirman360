@@ -1,0 +1,33 @@
+{
+  "name": "nirman360-frontend",
+  "version": "1.0.0",
+  "description": "Nirman360 Construction Equipment Rental Platform - Frontend",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build needed for static site'",
+    "deploy": "vercel --prod",
+    "serve": "python -m http.server 8000"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4"
+  },
+  "devDependencies": {
+    "vercel": "^32.4.1"
+  },
+  "keywords": [
+    "construction",
+    "equipment",
+    "rental",
+    "bangalore",
+    "nirman360",
+    "supabase",
+    "vercel"
+  ],
+  "author": "Nirman360 Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/nirman360.git"
+  }
+}
