@@ -31,6 +31,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Supabase JS -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
     <!-- Custom CSS -->
     <style>
         .gradient-text {
@@ -646,43 +649,85 @@
         </div>
     </section>
 
-    <!-- JavaScript -->
+    // JavaScript -->
     <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://vlfucggnbkizkxkvzfux.supabase.co';
+        const supabaseAnonKey = 'sb_publishable_3XK1mz1LLVc7016pPUpgmQ_uk7CXWSr';
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
             menu.classList.toggle('hidden');
         }
         
-        function showEquipmentForm() {
-            document.getElementById('equipmentForm').classList.remove('hidden');
-            document.getElementById('materialForm').classList.add('hidden');
-            document.getElementById('successMessage').classList.add('hidden');
-            
-            // Scroll to form
-            document.getElementById('equipmentForm').scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+        // Load service areas on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('service_areas')
+                    .select('*')
+                    .eq('status', 'active')
+                    .order('name');
+
+                if (error) {
+                    console.error('Error loading service areas:', error);
+                    return;
+                }
+
+                // Populate service area select options
+                const serviceAreaSelects = document.querySelectorAll('select[required]');
+                serviceAreaSelects.forEach(select => {
+                    if (select.name === 'service_area' || select.id === 'service_area') {
+                        // Clear existing options except the first one
+                        while (select.children.length > 1) {
+                            select.removeChild(select.lastChild);
+                        }
+                        
+                        // Add service area options
+                        data.forEach(area => {
+                            const option = document.createElement('option');
+                            option.value = area.name;
+                            option.textContent = area.name;
+                            select.appendChild(option);
+                        });
+                    }
+                });
+                
+                console.log('✅ Service areas loaded successfully');
+            } catch (error) {
+                console.error('Error loading service areas:', error);
+            }
+        });
+        
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
             });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.remove('bg-gray-200', 'text-gray-700');
+            event.target.classList.add('bg-blue-600', 'text-white');
         }
         
-        function showMaterialForm() {
-            document.getElementById('materialForm').classList.remove('hidden');
-            document.getElementById('equipmentForm').classList.add('hidden');
-            document.getElementById('successMessage').classList.add('hidden');
-            
-            // Scroll to form
-            document.getElementById('materialForm').scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-        
-        function submitEquipmentForm(event) {
+        // Equipment form submission
+        async function submitEquipmentForm(event) {
             event.preventDefault();
             
             // Collect form data
             const formData = {
-                provider_name: document.querySelector('input[placeholder="John Doe"]').value,
+                name: document.querySelector('input[placeholder="John Doe"]').value,
                 phone: document.querySelector('input[placeholder="+91 98765 43210"]').value,
                 email: document.querySelector('input[placeholder="john@example.com"]').value,
                 company_name: document.querySelector('input[placeholder="ABC Construction Equipment"]').value,
@@ -699,16 +744,60 @@
                 address: document.querySelector('input[placeholder*="Main Road"]').value
             };
             
-            // Send data to backend
-            fetch('http://localhost:3000/api/equipment/list', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
+            try {
+                // Check if provider exists
+                const { data: existingProvider } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('phone', formData.phone)
+                    .single();
+
+                let providerId;
+                
+                if (existingProvider) {
+                    providerId = existingProvider.id;
+                } else {
+                    // Create new provider
+                    const { data: newProvider, error: providerError } = await supabase
+                        .from('users')
+                        .insert([{
+                            name: formData.name,
+                            phone: formData.phone,
+                            email: formData.email,
+                            company_name: formData.company_name,
+                            user_type: 'equipment_provider',
+                            address: formData.address,
+                            service_area: formData.service_area
+                        }])
+                        .select()
+                        .single();
+
+                    if (providerError) throw providerError;
+                    providerId = newProvider.id;
+                }
+
+                // Create equipment listing
+                const { data, error } = await supabase
+                    .from('equipment')
+                    .insert([{
+                        provider_id: providerId,
+                        equipment_type: formData.equipment_type,
+                        brand_model: formData.brand_model,
+                        year_of_manufacture: formData.year_of_manufacture,
+                        working_condition: formData.working_condition,
+                        description: formData.description,
+                        hourly_rate: parseFloat(formData.hourly_rate),
+                        daily_rate: parseFloat(formData.daily_rate),
+                        monthly_rate: parseFloat(formData.monthly_rate),
+                        availability_status: formData.availability_status,
+                        service_area: formData.service_area,
+                        address: formData.address
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                
                 console.log('Success:', data);
                 // Show success message
                 document.getElementById('equipmentForm').classList.add('hidden');
@@ -720,19 +809,19 @@
                     behavior: 'smooth',
                     block: 'start'
                 });
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error('Error:', error);
-                alert('Error submitting form. Please try again.');
-            });
+                alert('Error submitting equipment form: ' + error.message);
+            }
         }
         
-        function submitMaterialForm(event) {
+        // Material form submission
+        async function submitMaterialForm(event) {
             event.preventDefault();
             
             // Collect form data
             const formData = {
-                seller_name: document.querySelector('#materialForm input[placeholder="John Doe"]').value,
+                name: document.querySelector('#materialForm input[placeholder="John Doe"]').value,
                 phone: document.querySelector('#materialForm input[placeholder="+91 98765 43210"]').value,
                 email: document.querySelector('#materialForm input[placeholder="john@example.com"]').value,
                 company_name: document.querySelector('#materialForm input[placeholder="ABC Building Materials"]').value,
@@ -748,16 +837,59 @@
                 delivery_charges: document.querySelector('#materialForm input[placeholder*="delivery"]').value
             };
             
-            // Send data to backend
-            fetch('http://localhost:3000/api/materials/list', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
+            try {
+                // Check if seller exists
+                const { data: existingSeller } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('phone', formData.phone)
+                    .single();
+
+                let sellerId;
+                
+                if (existingSeller) {
+                    sellerId = existingSeller.id;
+                } else {
+                    // Create new seller
+                    const { data: newSeller, error: sellerError } = await supabase
+                        .from('users')
+                        .insert([{
+                            name: formData.name,
+                            phone: formData.phone,
+                            email: formData.email,
+                            company_name: formData.company_name,
+                            user_type: 'material_seller',
+                            address: formData.address,
+                            service_area: formData.service_area
+                        }])
+                        .select()
+                        .single();
+
+                    if (sellerError) throw sellerError;
+                    sellerId = newSeller.id;
+                }
+
+                // Create material listing
+                const { data, error } = await supabase
+                    .from('materials')
+                    .insert([{
+                        seller_id: sellerId,
+                        material_type: formData.material_type,
+                        brand_grade: formData.brand_grade,
+                        available_quantity: formData.available_quantity,
+                        unit_price: parseFloat(formData.unit_price),
+                        description: formData.description,
+                        service_area: formData.service_area,
+                        address: formData.address,
+                        delivery_available: formData.delivery_available,
+                        pickup_available: formData.pickup_available,
+                        delivery_charges: formData.delivery_charges
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                
                 console.log('Success:', data);
                 // Show success message
                 document.getElementById('equipmentForm').classList.add('hidden');
@@ -769,11 +901,72 @@
                     behavior: 'smooth',
                     block: 'start'
                 });
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error('Error:', error);
-                alert('Error submitting form. Please try again.');
-            });
+                alert('Error submitting material form: ' + error.message);
+            }
+        }
+        
+        // Browse Equipment functionality
+        async function browseEquipment() {
+            try {
+                const { data, error } = await supabase
+                    .from('equipment')
+                    .select(`
+                        *,
+                        users!equipment_provider_id_fkey (
+                            name,
+                            phone,
+                            company_name
+                        )
+                    `)
+                    .eq('status', 'active')
+                    .limit(10);
+
+                if (error) throw error;
+                
+                // Create a simple equipment listing
+                let equipmentHtml = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">';
+                
+                data.forEach(item => {
+                    equipmentHtml += `
+                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">${item.brand_model}</h3>
+                            <p class="text-gray-600 mb-2">${item.equipment_type} • ${item.working_condition}</p>
+                            <p class="text-blue-600 font-semibold mb-2">₹${item.daily_rate}/day</p>
+                            <p class="text-sm text-gray-500 mb-2">📍 ${item.service_area}</p>
+                            <p class="text-sm text-gray-600 mb-4">${item.description || 'No description available'}</p>
+                            <div class="border-t pt-4">
+                                <p class="text-sm font-semibold text-gray-700">${item.users?.company_name || 'Provider'}</p>
+                                <p class="text-sm text-gray-600">📞 ${item.users?.phone || 'Contact for details'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                equipmentHtml += '</div>';
+                
+                // Show equipment in a modal or new section
+                const equipmentSection = document.createElement('div');
+                equipmentSection.innerHTML = `
+                    <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                        <div class="bg-white rounded-lg max-w-6xl max-h-[90vh] overflow-y-auto p-6 relative">
+                            <button onclick="this.closest('.fixed').remove()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">🏗️ Available Equipment</h2>
+                            ${equipmentHtml}
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(equipmentSection);
+                
+            } catch (error) {
+                console.error('Error browsing equipment:', error);
+                alert('Error loading equipment. Please try again.');
+            }
         }
         
         // Smooth scrolling for anchor links
