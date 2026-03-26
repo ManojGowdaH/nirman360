@@ -272,7 +272,7 @@
                                 Generators, Mixers, Compactors
                             </div>
                         </div>
-                        <button class="btn-primary w-full mt-6">
+                        <button type="button" class="btn-primary w-full mt-6" onclick="showEquipmentForm()">
                             List Equipment →
                         </button>
                     </div>
@@ -310,7 +310,7 @@
                                 Bricks, Blocks, Tiles
                             </div>
                         </div>
-                        <button class="btn-secondary w-full mt-6 border-green-600 text-green-600 hover:bg-green-600 hover:text-white">
+                        <button type="button" class="btn-secondary w-full mt-6 border-green-600 text-green-600 hover:bg-green-600 hover:text-white" onclick="showMaterialForm()">
                             List Materials →
                         </button>
                     </div>
@@ -362,7 +362,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Equipment Type *</label>
-                                <select class="form-select" required>
+                                <select id="equipment_type" class="form-select" required>
                                     <option value="">Select Equipment Type</option>
                                     <option value="jcb">JCB/Excavator</option>
                                     <option value="crane">Crane</option>
@@ -384,7 +384,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Working Condition</label>
-                                <select class="form-select">
+                                <select id="working_condition" class="form-select">
                                     <option value="excellent">Excellent</option>
                                     <option value="good">Good</option>
                                     <option value="fair">Fair</option>
@@ -417,8 +417,8 @@
                         </div>
                         
                         <div class="mt-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
-                            <select class="form-select">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
+                                <select id="availability_status" class="form-select">
                                 <option value="available">Available Now</option>
                                 <option value="busy">Currently Busy</option>
                                 <option value="maintenance">Under Maintenance</option>
@@ -432,7 +432,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Service Area *</label>
-                                <select class="form-select" required>
+                                <select id="equipment_service_area" name="service_area" class="form-select" required>
                                     <option value="">Select Service Area</option>
                                     <option value="whitefield">Whitefield</option>
                                     <option value="sarjapur">Sarjapur Road</option>
@@ -507,7 +507,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Material Type *</label>
-                                <select class="form-select" required>
+                                <select id="material_type" class="form-select" required>
                                     <option value="">Select Material Type</option>
                                     <option value="cement">Cement</option>
                                     <option value="sand">Sand</option>
@@ -545,7 +545,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Service Area *</label>
-                                <select class="form-select" required>
+                                <select id="material_service_area" name="service_area" class="form-select" required>
                                     <option value="">Select Service Area</option>
                                     <option value="whitefield">Whitefield</option>
                                     <option value="sarjapur">Sarjapur Road</option>
@@ -649,22 +649,67 @@
         </div>
     </section>
 
-    // JavaScript -->
+    <!-- JavaScript -->
     <script>
-        // Initialize Supabase
+        // Initialize Supabase (CDN build exposes `window.supabase.createClient`)
         const supabaseUrl = 'https://vlfucggnbkizkxkvzfux.supabase.co';
         const supabaseAnonKey = 'sb_publishable_3XK1mz1LLVc7016pPUpgmQ_uk7CXWSr';
-        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        const supabaseClient = window.supabase?.createClient
+            ? window.supabase.createClient(supabaseUrl, supabaseAnonKey)
+            : null;
+        
+        // Ensure we have an authenticated session for RLS INSERT policies.
+        // If anonymous sign-in is not enabled in Supabase Auth, this will fail gracefully.
+        async function ensureSignedIn() {
+            try {
+                if (!supabaseClient) return false;
+
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) return true;
+
+                const { error } = await supabaseClient.auth.signInAnonymously();
+                if (error) {
+                    console.warn('Anonymous sign-in failed:', error.message || error);
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                console.warn('Auth setup error:', e);
+                return false;
+            }
+        }
+
+        const authReady = ensureSignedIn();
         
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
             menu.classList.toggle('hidden');
         }
+
+        function showEquipmentForm() {
+            document.getElementById('equipmentForm').classList.remove('hidden');
+            document.getElementById('materialForm').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+
+            document.getElementById('equipmentForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function showMaterialForm() {
+            document.getElementById('materialForm').classList.remove('hidden');
+            document.getElementById('equipmentForm').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+
+            document.getElementById('materialForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         
         // Load service areas on page load
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const { data, error } = await supabase
+                await authReady;
+
+                if (!supabaseClient) throw new Error('Supabase client not initialized');
+
+                const { data, error } = await supabaseClient
                     .from('service_areas')
                     .select('*')
                     .eq('status', 'active')
@@ -726,27 +771,32 @@
             event.preventDefault();
             
             // Collect form data
+            const equipmentForm = document.getElementById('equipmentForm');
             const formData = {
-                name: document.querySelector('input[placeholder="John Doe"]').value,
-                phone: document.querySelector('input[placeholder="+91 98765 43210"]').value,
-                email: document.querySelector('input[placeholder="john@example.com"]').value,
-                company_name: document.querySelector('input[placeholder="ABC Construction Equipment"]').value,
-                equipment_type: document.querySelector('select[required] option:checked').value,
-                brand_model: document.querySelector('input[placeholder="JCB 3DX, Tata Hitachi, etc."]').value,
-                year_of_manufacture: document.querySelector('input[placeholder="2020"]').value,
-                working_condition: document.querySelector('select').value,
-                description: document.querySelector('textarea[placeholder*="equipment"]').value,
-                hourly_rate: document.querySelector('input[placeholder="500"]').value,
-                daily_rate: document.querySelector('input[placeholder="3000"]').value,
-                monthly_rate: document.querySelector('input[placeholder="45000"]').value,
-                availability_status: document.querySelector('select:last-of-type').value,
-                service_area: document.querySelector('select[required]:last-of-type option:checked').value,
-                address: document.querySelector('input[placeholder*="Main Road"]').value
+                name: equipmentForm.querySelector('input[placeholder="John Doe"]').value,
+                phone: equipmentForm.querySelector('input[placeholder="+91 98765 43210"]').value,
+                email: equipmentForm.querySelector('input[placeholder="john@example.com"]').value,
+                company_name: equipmentForm.querySelector('input[placeholder="ABC Construction Equipment"]').value,
+                equipment_type: equipmentForm.querySelector('#equipment_type').value,
+                brand_model: equipmentForm.querySelector('input[placeholder="JCB 3DX, Tata Hitachi, etc."]').value,
+                year_of_manufacture: equipmentForm.querySelector('input[placeholder="2020"]').value,
+                working_condition: equipmentForm.querySelector('#working_condition').value,
+                description: equipmentForm.querySelector('textarea[placeholder*="equipment"]').value,
+                hourly_rate: equipmentForm.querySelector('input[placeholder="500"]').value,
+                daily_rate: equipmentForm.querySelector('input[placeholder="3000"]').value,
+                monthly_rate: equipmentForm.querySelector('input[placeholder="45000"]').value,
+                availability_status: equipmentForm.querySelector('#availability_status').value,
+                service_area: equipmentForm.querySelector('#equipment_service_area').value,
+                address: equipmentForm.querySelector('input[placeholder*="Main Road"]').value
             };
             
             try {
+                await authReady;
+
                 // Check if provider exists
-                const { data: existingProvider } = await supabase
+                if (!supabaseClient) throw new Error('Supabase client not initialized');
+
+                const { data: existingProvider } = await supabaseClient
                     .from('users')
                     .select('id')
                     .eq('phone', formData.phone)
@@ -758,7 +808,7 @@
                     providerId = existingProvider.id;
                 } else {
                     // Create new provider
-                    const { data: newProvider, error: providerError } = await supabase
+                    const { data: newProvider, error: providerError } = await supabaseClient
                         .from('users')
                         .insert([{
                             name: formData.name,
@@ -777,7 +827,7 @@
                 }
 
                 // Create equipment listing
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('equipment')
                     .insert([{
                         provider_id: providerId,
@@ -820,26 +870,31 @@
             event.preventDefault();
             
             // Collect form data
+            const materialForm = document.getElementById('materialForm');
             const formData = {
-                name: document.querySelector('#materialForm input[placeholder="John Doe"]').value,
-                phone: document.querySelector('#materialForm input[placeholder="+91 98765 43210"]').value,
-                email: document.querySelector('#materialForm input[placeholder="john@example.com"]').value,
-                company_name: document.querySelector('#materialForm input[placeholder="ABC Building Materials"]').value,
-                material_type: document.querySelector('#materialForm select[required] option:checked').value,
-                brand_grade: document.querySelector('#materialForm input[placeholder="ACC Cement 53 Grade, TATA TMT, etc."]').value,
-                available_quantity: document.querySelector('#materialForm input[placeholder="500 bags, 10 tons, etc."]').value,
-                unit_price: document.querySelector('#materialForm input[placeholder="350 per bag, 50000 per ton"]').value,
-                description: document.querySelector('#materialForm textarea[placeholder*="material"]').value,
-                service_area: document.querySelector('#materialForm select[required]:last-of-type option:checked').value,
-                address: document.querySelector('#materialForm input[placeholder*="Main Road"]').value,
+                name: materialForm.querySelector('input[placeholder="John Doe"]').value,
+                phone: materialForm.querySelector('input[placeholder="+91 98765 43210"]').value,
+                email: materialForm.querySelector('input[placeholder="john@example.com"]').value,
+                company_name: materialForm.querySelector('input[placeholder="ABC Building Materials"]').value,
+                material_type: materialForm.querySelector('#material_type').value,
+                brand_grade: materialForm.querySelector('input[placeholder="ACC Cement 53 Grade, TATA TMT, etc."]').value,
+                available_quantity: materialForm.querySelector('input[placeholder="500 bags, 10 tons, etc."]').value,
+                unit_price: materialForm.querySelector('input[placeholder="350 per bag, 50000 per ton"]').value,
+                description: materialForm.querySelector('textarea[placeholder*="material"]').value,
+                service_area: materialForm.querySelector('#material_service_area').value,
+                address: materialForm.querySelector('input[placeholder*="Main Road"]').value,
                 delivery_available: document.getElementById('delivery').checked,
                 pickup_available: document.getElementById('pickup').checked,
-                delivery_charges: document.querySelector('#materialForm input[placeholder*="delivery"]').value
+                delivery_charges: materialForm.querySelector('input[placeholder*="delivery"]').value
             };
             
             try {
+                await authReady;
+
                 // Check if seller exists
-                const { data: existingSeller } = await supabase
+                if (!supabaseClient) throw new Error('Supabase client not initialized');
+
+                const { data: existingSeller } = await supabaseClient
                     .from('users')
                     .select('id')
                     .eq('phone', formData.phone)
@@ -851,7 +906,7 @@
                     sellerId = existingSeller.id;
                 } else {
                     // Create new seller
-                    const { data: newSeller, error: sellerError } = await supabase
+                    const { data: newSeller, error: sellerError } = await supabaseClient
                         .from('users')
                         .insert([{
                             name: formData.name,
@@ -870,7 +925,7 @@
                 }
 
                 // Create material listing
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('materials')
                     .insert([{
                         seller_id: sellerId,
@@ -910,7 +965,9 @@
         // Browse Equipment functionality
         async function browseEquipment() {
             try {
-                const { data, error } = await supabase
+                if (!supabaseClient) throw new Error('Supabase client not initialized');
+
+                const { data, error } = await supabaseClient
                     .from('equipment')
                     .select(`
                         *,
