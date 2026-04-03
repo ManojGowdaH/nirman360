@@ -113,3 +113,6 @@ service-account-key.json
 # Upload directories
 uploads/
 temp/
+
+.vercel
+.env*.local
