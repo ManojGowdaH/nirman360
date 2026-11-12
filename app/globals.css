@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #15191d;
+  --color-ink-soft: #202428;
+  --color-orange: #ff6b24;
+  --color-orange-deep: #b8430e;
+  --color-ember: #f28a45;
+  --color-paper: #f5f3ef;
+  --color-steel: #737b82;
+  --color-muted: #4d565d;
+  --color-mist: #eceff1;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink-soft);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection {
+  background: #ff6b24;
+  color: #15191d;
+}
+
+:focus-visible {
+  outline: 2px solid #ff6b24;
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 80;
+  border-radius: 999px;
+  background: white;
+  color: #15191d;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.menu-button {
+  display: none;
+}
+
+.js .menu-button {
+  display: inline-flex;
+}
+
+.js .mobile-panel {
+  display: none;
+}
+
+.js .mobile-panel.is-open {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .menu-button {
+    display: none !important;
+  }
+
+  .mobile-panel {
+    display: none !important;
+  }
+}
+
+.legal-copy h2 {
+  margin-top: 2.5rem;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #15191d;
+}
+
+.legal-copy p,
+.legal-copy li {
+  color: #3c444a;
+  line-height: 1.75;
+}
+
+.legal-copy ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.legal-copy li + li {
+  margin-top: 0.4rem;
+}
+
+.legal-copy a {
+  color: #b8430e;
+  text-underline-offset: 3px;
+}
+
+@keyframes faq-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.faq-panel {
+  animation: faq-in 0.28s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-panel {
+    animation: none;
+  }
+}
